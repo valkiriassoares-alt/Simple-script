@@ -48,10 +48,22 @@ local function getCharacter()
 
     if not Humanoid or not HRP then
         log("ERRO: personagem incompleto após 10 segundos.")
-        return
+        return nil
     end
 
     return Character, Humanoid, HRP
+end
+
+local function stopTween()
+    if CurrentTween then
+        CurrentTween:Cancel()
+        CurrentTween = nil
+    end
+
+    local Character = Player.Character
+    local HRP = Character
+        and Character:FindFirstChild("HumanoidRootPart")
+
 end
 
 local function runFarm(myRunId)
@@ -69,8 +81,6 @@ local function runFarm(myRunId)
 
         log("Novo ciclo iniciado.")
         log("Posição inicial: " .. tostring(HRP.Position))
-
-        HRP.Anchored = true
 
         local CompletedCourse = true
 
@@ -115,7 +125,7 @@ local function runFarm(myRunId)
 
             log(
                 "Ponto " .. Index .. " alcançado. Posição: "
-                .. tostring(HRP.Position)
+                    .. tostring(HRP.Position)
             )
         end
 
@@ -163,11 +173,7 @@ local function runFarm(myRunId)
         end
     end
 
-    if CurrentTween then
-        CurrentTween:Cancel()
-        CurrentTween = nil
-    end
-
+    stopTween()
     log("Auto Farm desligado.")
 end
 
@@ -182,10 +188,6 @@ TextButton.Activated:Connect(function()
     else
         TextButton.Text = "Auto Farm"
         log("Solicitação para parar recebida.")
-
-        if CurrentTween then
-            CurrentTween:Cancel()
-            CurrentTween = nil
-        end
+        stopTween()
     end
 end)
