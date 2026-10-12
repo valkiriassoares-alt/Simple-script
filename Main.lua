@@ -18,16 +18,16 @@ TextButton.TextScaled = true
 TextButton.Text = "Auto Farm"
 
 local Parts = {
-    CFrame.new(-53.566, 70, 1369.395),
-    CFrame.new(-53.566, 70, 2139.395),
-    CFrame.new(-53.566, 70, 2909.395),
-    CFrame.new(-53.566, 70, 3679.395),
-    CFrame.new(-53.566, 70, 4449.395),
-    CFrame.new(-53.566, 70, 5219.395),
-    CFrame.new(-53.566, 70, 5989.395),
-    CFrame.new(-53.566, 70, 6759.395),
-    CFrame.new(-53.566, 70, 7529.395),
-    CFrame.new(-53.566, 70, 8299.395)
+    CFrame.new(-53.566, 60.4, 1369.395),
+    CFrame.new(-53.566, 60.4, 2139.395),
+    CFrame.new(-53.566, 60.4, 2909.395),
+    CFrame.new(-53.566, 60.4, 3679.395),
+    CFrame.new(-53.566, 60.4, 4449.395),
+    CFrame.new(-53.566, 60.4, 5219.395),
+    CFrame.new(-53.566, 60.4, 5989.395),
+    CFrame.new(-53.566, 60.4, 6759.395),
+    CFrame.new(-53.566, 60.4, 7529.395),
+    CFrame.new(-53.566, 60.4, 8299.395)
 }
 
 local Enabled = false
@@ -41,10 +41,33 @@ end
 
 local function getCharacter()
     local Character = Player.Character
-        or Player.CharacterAdded:Wait()
 
-    local Humanoid = Character:WaitForChild("Humanoid")
-    local HRP = Character:WaitForChild("HumanoidRootPart")
+    if not Character then
+        Character = Player.CharacterAdded:Wait()
+    end
+
+    if not Enabled then
+        return nil
+    end
+
+    local Humanoid = Character:WaitForChild("Humanoid", 10)
+
+    if not Humanoid then
+        log("ERRO: Humanoid não apareceu em 10 segundos.")
+        return nil
+    end
+
+    local HRP = Character:WaitForChild("HumanoidRootPart", 10)
+
+    if not HRP then
+        log("ERRO: HumanoidRootPart não apareceu em 10 segundos.")
+        return nil
+    end
+
+    if not Character.Parent or Player.Character ~= Character then
+        log("Personagem substituído durante a inicialização.")
+        return nil
+    end
 
     return Character, Humanoid, HRP
 end
@@ -72,6 +95,16 @@ local function runFarm(myRunId)
             break
         end
 
+        if not Character then
+            task.wait(0.5)
+            continue
+        end
+
+        if Humanoid.Health <= 0 then
+            task.wait(0.5)
+            continue
+        end
+
         log("Novo ciclo iniciado.")
 
         local CompletedCourse = true
@@ -82,7 +115,11 @@ local function runFarm(myRunId)
                 break
             end
 
-            if not Character.Parent or Humanoid.Health <= 0 then
+            if Player.Character ~= Character
+                or not Character.Parent
+                or Humanoid.Health <= 0 then
+
+                log("Personagem mudou durante o percurso.")
                 CompletedCourse = false
                 break
             end
@@ -108,7 +145,13 @@ local function runFarm(myRunId)
                 CurrentTween = nil
             end
 
+            if not Enabled or RunId ~= myRunId then
+                CompletedCourse = false
+                break
+            end
+
             if State ~= Enum.PlaybackState.Completed then
+                log("Movimento cancelado no ponto " .. Index)
                 CompletedCourse = false
                 break
             end
@@ -121,6 +164,7 @@ local function runFarm(myRunId)
         end
 
         if CompletedCourse
+            and Player.Character == Character
             and Character.Parent
             and Humanoid.Health > 0 then
 
@@ -130,16 +174,24 @@ local function runFarm(myRunId)
             Humanoid.Health = 0
 
             log("Aguardando o próximo personagem...")
-            local NewCharacter = Player.CharacterAdded:Wait()
+
+            local NewCharacter = Player.Character
+
+            while Enabled
+                and RunId == myRunId
+                and NewCharacter == Character do
+
+                NewCharacter = Player.CharacterAdded:Wait()
+            end
 
             if not Enabled or RunId ~= myRunId then
                 break
             end
 
-            log("Novo personagem detectado: " .. NewCharacter.Name)
+            log("Novo personagem detectado.")
         else
             log("Percurso incompleto. Tentando novamente.")
-            task.wait(1)
+            task.wait(0.5)
         end
     end
 
