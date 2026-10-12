@@ -31,7 +31,7 @@ local Parts = {
 }
 
 local Enabled = false
-local TweenDuration = 1
+local TweenDuration = 1.25
 local CurrentTween = nil
 local RunId = 0
 
