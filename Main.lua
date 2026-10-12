@@ -1,11 +1,15 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local Player = Players.LocalPlayer
+
 local ScreenGui = Instance.new("ScreenGui")
 local TextButton = Instance.new("TextButton")
 
-local Player = game.Players.LocalPlayer
-local TweenService = game:GetService("TweenService")
-
-ScreenGui.Parent = Player:WaitForChild("PlayerGui")
+ScreenGui.Name = "AutoFarmGui"
+ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Parent = Player:WaitForChild("PlayerGui")
 
 TextButton.Parent = ScreenGui
 TextButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -34,7 +38,7 @@ local Parts = {
 }
 
 local Teleporting = false
-local TweenDuration = 2
+local TweenDuration = 1.5
 local CurrentTween = nil
 
 TextButton.Activated:Connect(function()
@@ -50,7 +54,7 @@ TextButton.Activated:Connect(function()
         return
     end
 
-    TextButton.Text = "Parar Auto Farm"
+    TextButton.Text = "Stop Auto Farm"
 
     task.spawn(function()
         while Teleporting do
@@ -66,11 +70,14 @@ TextButton.Activated:Connect(function()
 
             HRP.Anchored = true
 
+            local CompletedCourse = true
+
             for _, TargetCFrame in ipairs(Parts) do
-                if not Teleporting then
-                    break
-                end
-                if not Character.Parent or Humanoid.Health <= 0 then
+                if not Teleporting
+                    or not Character.Parent
+                    or Humanoid.Health <= 0 then
+
+                    CompletedCourse = false
                     break
                 end
 
@@ -90,6 +97,7 @@ TextButton.Activated:Connect(function()
                 CurrentTween = nil
 
                 if State ~= Enum.PlaybackState.Completed then
+                    CompletedCourse = false
                     break
                 end
             end
@@ -98,24 +106,32 @@ TextButton.Activated:Connect(function()
                 break
             end
 
-            if Character.Parent
-                and Humanoid.Health > 0
-                and HRP.Position:FuzzyEq(Parts[#Parts].Position, 0.1) then
+            if CompletedCourse
+                and Character.Parent
+                and Humanoid.Health > 0 then
 
-                HRP.Anchored = false
-                Humanoid.Health = 0
-
-                local NewCharacter = Player.Character
-
-                repeat
-                    NewCharacter = Player.CharacterAdded:Wait()
-                until not Teleporting or NewCharacter ~= Character
+                task.wait(1)
 
                 if not Teleporting then
                     break
                 end
-						
-                task.wait(0.5)
+
+                if Character.Parent and Humanoid.Health > 0 then
+                    HRP.Anchored = false
+                    Humanoid.Health = 0
+
+                    local NewCharacter
+
+                    repeat
+                        NewCharacter = Player.CharacterAdded:Wait()
+                    until not Teleporting or NewCharacter ~= Character
+
+                    if not Teleporting then
+                        break
+                    end
+
+                    task.wait(1)
+                end
             end
         end
 
