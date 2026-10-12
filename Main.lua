@@ -1,3 +1,4 @@
+```lua
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
@@ -18,16 +19,16 @@ TextButton.TextScaled = true
 TextButton.Text = "Auto Farm"
 
 local Parts = {
-    CFrame.new(-53.566, 50.4, 1369.395),
-    CFrame.new(-53.566, 50.4, 2139.395),
-    CFrame.new(-53.566, 50.4, 2909.395),
-    CFrame.new(-53.566, 50.4, 3679.395),
-    CFrame.new(-53.566, 50.4, 4449.395),
-    CFrame.new(-53.566, 50.4, 5219.395),
-    CFrame.new(-53.566, 50.4, 5989.395),
-    CFrame.new(-53.566, 50.4, 6759.395),
-    CFrame.new(-53.566, 50.4, 7529.395),
-    CFrame.new(-53.566, 50.4, 8299.395)
+    CFrame.new(-53.566, 60.4, 1369.395),
+    CFrame.new(-53.566, 60.4, 2139.395),
+    CFrame.new(-53.566, 60.4, 2909.395),
+    CFrame.new(-53.566, 60.4, 3679.395),
+    CFrame.new(-53.566, 60.4, 4449.395),
+    CFrame.new(-53.566, 60.4, 5219.395),
+    CFrame.new(-53.566, 60.4, 5989.395),
+    CFrame.new(-53.566, 60.4, 6759.395),
+    CFrame.new(-53.566, 60.4, 7529.395),
+    CFrame.new(-53.566, 60.4, 8299.395)
 }
 
 local Enabled = false
@@ -64,6 +65,9 @@ local function stopTween()
     local HRP = Character
         and Character:FindFirstChild("HumanoidRootPart")
 
+    if HRP then
+        HRP.Anchored = false
+    end
 end
 
 local function runFarm(myRunId)
@@ -164,8 +168,7 @@ local function runFarm(myRunId)
                     break
                 end
 
-                log("Novo personagem detectado. Aguardando 1 segundo.")
-                task.wait(1)
+                log("Novo personagem detectado. Reiniciando imediatamente.")
             end
         else
             log("Percurso incompleto. Tentando novamente.")
@@ -191,3 +194,4 @@ TextButton.Activated:Connect(function()
         stopTween()
     end
 end)
+```
