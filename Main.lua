@@ -18,16 +18,16 @@ TextButton.TextScaled = true
 TextButton.Text = "Auto Farm"
 
 local Parts = {
-    CFrame.new(-53.566, 60.4, 1369.395),
-    CFrame.new(-53.566, 60.4, 2139.395),
-    CFrame.new(-53.566, 60.4, 2909.395),
-    CFrame.new(-53.566, 60.4, 3679.395),
-    CFrame.new(-53.566, 60.4, 4449.395),
-    CFrame.new(-53.566, 60.4, 5219.395),
-    CFrame.new(-53.566, 60.4, 5989.395),
-    CFrame.new(-53.566, 60.4, 6759.395),
-    CFrame.new(-53.566, 60.4, 7529.395),
-    CFrame.new(-53.566, 60.4, 8299.395)
+    CFrame.new(-53.566, 70, 1369.395),
+    CFrame.new(-53.566, 70, 2139.395),
+    CFrame.new(-53.566, 70, 2909.395),
+    CFrame.new(-53.566, 70, 3679.395),
+    CFrame.new(-53.566, 70, 4449.395),
+    CFrame.new(-53.566, 70, 5219.395),
+    CFrame.new(-53.566, 70, 5989.395),
+    CFrame.new(-53.566, 70, 6759.395),
+    CFrame.new(-53.566, 70, 7529.395),
+    CFrame.new(-53.566, 70, 8299.395)
 }
 
 local Enabled = false
@@ -43,13 +43,8 @@ local function getCharacter()
     local Character = Player.Character
         or Player.CharacterAdded:Wait()
 
-    local Humanoid = Character:WaitForChild("Humanoid", 10)
-    local HRP = Character:WaitForChild("HumanoidRootPart", 10)
-
-    if not Humanoid or not HRP then
-        log("ERRO: personagem incompleto após 10 segundos.")
-        return nil
-    end
+    local Humanoid = Character:WaitForChild("Humanoid")
+    local HRP = Character:WaitForChild("HumanoidRootPart")
 
     return Character, Humanoid, HRP
 end
@@ -73,17 +68,11 @@ local function runFarm(myRunId)
     while Enabled and RunId == myRunId do
         local Character, Humanoid, HRP = getCharacter()
 
-        if not Character then
-            task.wait(1)
-            continue
-        end
-
         if not Enabled or RunId ~= myRunId then
             break
         end
 
         log("Novo ciclo iniciado.")
-        log("Posição inicial: " .. tostring(HRP.Position))
 
         local CompletedCourse = true
 
@@ -94,7 +83,6 @@ local function runFarm(myRunId)
             end
 
             if not Character.Parent or Humanoid.Health <= 0 then
-                log("ERRO: personagem morreu no ponto " .. Index)
                 CompletedCourse = false
                 break
             end
@@ -121,15 +109,11 @@ local function runFarm(myRunId)
             end
 
             if State ~= Enum.PlaybackState.Completed then
-                log("AVISO: movimento cancelado no ponto " .. Index)
                 CompletedCourse = false
                 break
             end
 
-            log(
-                "Ponto " .. Index .. " alcançado. Posição: "
-                    .. tostring(HRP.Position)
-            )
+            log("Ponto " .. Index .. " alcançado.")
         end
 
         if not Enabled or RunId ~= myRunId then
@@ -140,35 +124,19 @@ local function runFarm(myRunId)
             and Character.Parent
             and Humanoid.Health > 0 then
 
-            log("Percurso concluído. Aguardando 1 segundo.")
-            task.wait(1)
+            log("Percurso concluído. Solicitando morte.")
+
+            HRP.Anchored = false
+            Humanoid.Health = 0
+
+            log("Aguardando o próximo personagem...")
+            local NewCharacter = Player.CharacterAdded:Wait()
 
             if not Enabled or RunId ~= myRunId then
                 break
             end
 
-            if Character.Parent and Humanoid.Health > 0 then
-                log("Solicitando morte para reiniciar o ciclo.")
-
-                HRP.Anchored = false
-                Humanoid.Health = 0
-
-                log("Aguardando o respawn...")
-
-                local NewCharacter
-
-                repeat
-                    NewCharacter = Player.CharacterAdded:Wait()
-                until not Enabled
-                    or RunId ~= myRunId
-                    or NewCharacter ~= Character
-
-                if not Enabled or RunId ~= myRunId then
-                    break
-                end
-
-                log("Novo personagem detectado. Reiniciando imediatamente.")
-            end
+            log("Novo personagem detectado: " .. NewCharacter.Name)
         else
             log("Percurso incompleto. Tentando novamente.")
             task.wait(1)
