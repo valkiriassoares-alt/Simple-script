@@ -1,4 +1,3 @@
-```lua
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
@@ -194,4 +193,3 @@ TextButton.Activated:Connect(function()
         stopTween()
     end
 end)
-```
