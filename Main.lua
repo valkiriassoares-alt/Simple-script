@@ -1,4 +1,3 @@
-```lua
 local ScreenGui = Instance.new("ScreenGui")
 local TextButton = Instance.new("TextButton")
 
@@ -128,4 +127,3 @@ TextButton.Activated:Connect(function()
         TextButton.Text = "Auto Farm"
     end)
 end)
-```
